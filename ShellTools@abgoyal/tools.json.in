@@ -1,0 +1,7 @@
+[ 
+["Terminator", "terminator"], 
+["Terminology", "terminology"], 
+["Send .mobi files to Kindle", "mobi2kindle_gui.sh"],
+["Rcvd: DATARX GB", "echo"],
+["Rate: DATARATE KBps", "echo"]
+]
