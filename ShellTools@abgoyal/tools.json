@@ -1,7 +1,7 @@
 [ 
 ["Terminator", "terminator"], 
 ["Terminology", "terminology"], 
-["Send .mobi files to Kindle", "mobi2kindle_gui.sh"],
+["Send .mobi files to Kindle", "sendToKindle_ShellTool.sh"],
 ["Rcvd: 217 GB", "echo"],
 ["Rate: 257 KBps", "echo"]
 ]

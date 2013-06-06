@@ -63,7 +63,7 @@ MyApplet.prototype = {
                 toolName = tool[0].trim(' ');
                 this.menu.addAction(_(toolName), function(event) {
                     toolCmd =  tool[1].trim(' ');
-                    Util.spawnCommandLine(toolVal);
+                    Util.spawnCommandLine(toolCmd);
                 });
             }
 
