@@ -61,10 +61,20 @@ MyApplet.prototype = {
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
                 toolName = tool[0].trim(' ');
-                this.menu.addAction(_(toolName), function(event) {
-                    toolCmd =  tool[1].trim(' ');
-                    Util.spawnCommandLine(toolCmd);
-                });
+                log(toolName);
+                if (toolName == "separator") {
+                    this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                }
+                else if (toolName[0] == "!") {
+                    toolName = toolName.substr(1);
+                    this.menu.addMenuItem(new PopupMenu.PopupMenuItem(toolName, { reactive: false }));
+                }
+                else {
+                        this.menu.addAction(_(toolName), function(event) {
+                        toolCmd =  tool[1].trim(' ');
+                        Util.spawnCommandLine(toolCmd);
+                    })
+                }
             }
 
     },

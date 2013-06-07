@@ -1,7 +1,14 @@
 [ 
 ["Terminator", "terminator"], 
-["Terminology", "terminology"], 
+["Terminology (e11t)", "terminology"], 
+["separator",""],
 ["Send .mobi files to Kindle", "sendToKindle_ShellTool.sh"],
-["Rcvd: DATARX GB", "echo"],
-["Rate: DATARATE KBps", "echo"]
+["separator",""],
+["!~NETS~./nets.sh~", "echo"],
+["separator",""],
+["!~DSFO~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~", "echo"],
+["!~DSFO~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~", "echo"],
+["!~DSFO~echo -n "LON: " ; TZ=Europe/London date +'%a %b %-d, %I:%M %P'~", "echo"],
+["separator",""],
+["Edit tools.json.in", "gedit /home/abhishek/.local/share/cinnamon/applets/ShellTools@abgoyal/tools.json.in"],
 ]
