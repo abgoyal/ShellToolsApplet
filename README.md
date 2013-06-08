@@ -1,4 +1,4 @@
-# ShellTools Applet:
+
 
 ## tl;dr
 
@@ -36,7 +36,7 @@ Install the applet as normal, add it to panel, and then click the applet icon in
 to start adding your own custom tools.
 
 ShellTools recreats the menu each time the icon is clicked in the Cinnamon panel. It re-reads the list of tools from
-`tools.json` when it builds the menu. So all you need to do to see any changes you made to the tools.json.in, is to wait upto 15 seconds
+`tools.json.in` when it builds the menu. So all you need to do to see any changes you made to the `tools.json.in`, is to wait upto 15 seconds
 and then click the applet icon.
 
 This allow quite a few fancy tricks. Read on.
@@ -51,7 +51,7 @@ json parser. Do not place extraneous content in this file. Standard "//" prefixe
 
 Going through each line in `tools.json.in` (listed above):
 
-- Lines 2 & 3: These are the basic shortcut-like entries: Each entry is a 2-element JSON array. 
+- Lines 2 & 3: These are the basic shortcut-like entries. Each entry is a 2-element JSON array. 
   The first element is a string that will become the label of the corresponding menu item. 
   The second element is the shell command to run when the entry is activated.
   Note that the shell command is spawned in a background process - if its a terminal-based application, you will see nothing.
@@ -61,24 +61,24 @@ Going through each line in `tools.json.in` (listed above):
   run in the background, so you won't see any console output if its a console app. The applet also adds its own appletdir/tools directory
   in the PATH before searching for commands, so any scripts placed there can also be run similarly.
 
-- Line 5: Inserts a "Seperator" into the popup menu. This is simply a 1-element JSON array.
+- Line 5: Inserts a "Separator" into the popup menu. This is simply a 1-element JSON array.
 
-- Line 6: This line defines an "informational" item with output substituition. It is simple a 1-element JSON array, as it executes no commands. 
+- Line 6: This line defines an informational-only, dynamic item with output substituition. It is simply a 1-element JSON  array, as it executes no commands. 
   What marks it as a "non-interactive" entry is that its first character is "!". This "!" will be removed by the applet
   before setting up the menu, but it will cause the applet to make the particular entry "inactive".
   Next is another special character "~". This is a field seperator for output substitution.
   Output substitution is a powerful function ShellTools offers that allows one to dynamically update the content of the menu label (or command) 
   based on the output of a script. Each output substituition entry requires three fields delimited with `~`.
 
-   - The first field is a small identifier, preferably 4-6 characters long, all capitals. It is used by the applet to maintain state. It _must_ be provided.
+   - The first field (here `NETS`) is a small identifier, preferably 4-6 characters long, all capitals. It is used by the applet to maintain state. It _must_ be provided.
 
-   -The second field is a "notify command" and is optional. In this particular entry, notify command has not been used.
+   - The second field (here empty) is a "notify command" and is optional. In this particular entry, notify command has not been used.
 
-   -The third field is the shell command whose output will be substituted. Here it is `netspeed.sh wlan0` which is a tool included with the applet that
-   reports total network download and current download rates. 
+   - The third field (here `netspeed.sh wlan0`) is the shell command whose output will be substituted. `netspeed.sh` is a tool included with the applet that
+   reports total network download and current download rates. `wlan0` is the interface to be monitored
   
   Thus the entire output substitution entry is `~NETS~~netspeed.sh wlan0~`. Note that the delimiter must be used at the beginning as well as end, not
-  just between the fields. 
+  just between the fields.
   
   Note also that as this entry is marked as "informational only", by prefixing it with `!`, the second element is not needed.
 
