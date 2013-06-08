@@ -1,15 +1,18 @@
 
 const Cinnamon = imports.gi.Cinnamon;
 const Applet = imports.ui.applet;
-const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
+const Mainloop = imports.mainloop;
+const Main = imports.ui.main;
 const Util = imports.misc.util;
 const GLib = imports.gi.GLib;
+const Lang = imports.lang;
 const AppletMeta = imports.ui.appletManager.applets["ShellTools@abgoyal"];
 const AppletDir = imports.ui.appletManager.appletMeta["ShellTools@abgoyal"].path;
 
 const IconsFile = GLib.build_filenamev([AppletDir, 'tools_icon.svg']);
 const ToolsFile = GLib.build_filenamev([AppletDir, 'tools.json']);
+const ToolsProcessor = GLib.build_filenamev([AppletDir, 'processTools.sh']);
 
 
 function MyApplet(orientation) {
@@ -26,7 +29,8 @@ MyApplet.prototype = {
         try {
             this.set_applet_icon_path(IconsFile);   
             this.set_applet_tooltip(_("Shell Tools"));
-            
+            this._updateFrequencySeconds = 15;
+
             this.menuManager = new PopupMenu.PopupMenuManager(this);
             this._orientation = orientation;
             this.menu = new Applet.AppletPopupMenu(this, this._orientation);
@@ -36,6 +40,7 @@ MyApplet.prototype = {
             global.logError(e);
         }
 
+        this._periodicProcessTools();
         this.setupDynamicMenu(ToolsFile);
 
     },
@@ -50,6 +55,22 @@ MyApplet.prototype = {
         this._initContextMenu();
     },
 
+    on_applet_removed_from_panel: function() {
+        if (this._periodicTimeoutId){
+            Mainloop.source_remove(this._periodicTimeoutId);
+        }
+    },
+
+    _periodicProcessTools: function() {
+        this._updateFrequencySeconds = Math.max(10, this._updateFrequencySeconds);
+        this._processTools();
+        this._periodicTimeoutId = Mainloop.timeout_add_seconds(this._updateFrequencySeconds, Lang.bind(this, this._periodicProcessTools));
+    },
+
+    _processTools: function() {
+        Util.spawnCommandLine(ToolsProcessor + " " + "\"" +  AppletDir + "\"" + " " + this._updateFrequencySeconds);
+    },
+
     setupDynamicMenu: function(f) {
 
             this.menu.removeAll();
@@ -62,7 +83,7 @@ MyApplet.prototype = {
                 let tool = tools[i];
                 toolName = tool[0].trim(' ');
                 log(toolName);
-                if (toolName == "separator") {
+                if (toolName == "-") {
                     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                 }
                 else if (toolName[0] == "!") {
