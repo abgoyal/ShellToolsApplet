@@ -13,7 +13,7 @@ const AppletDir = imports.ui.appletManager.appletMeta["ShellTools@abgoyal"].path
 const IconsFile = GLib.build_filenamev([AppletDir, 'tools_icon.svg']);
 const ToolsFile = GLib.build_filenamev([AppletDir, 'tools.json']);
 const ToolsProcessor = GLib.build_filenamev([AppletDir, 'processTools.sh']);
-
+const ToolsDir = GLib.build_filenamev([AppletDir, 'tools']);
 
 function MyApplet(orientation) {
     this._init(orientation);
@@ -30,11 +30,15 @@ MyApplet.prototype = {
             this.set_applet_icon_path(IconsFile);   
             this.set_applet_tooltip(_("Shell Tools"));
             this._updateFrequencySeconds = 15;
-
+            // make sure the helper scripts have execute permissions, or things break
+            // by default, after install, the scripts do not have execute permissions
+            Util.spawnCommandLine("chmod  744 " + ToolsProcessor);
+            Util.spawnCommandLine("chmod -R 744 " + ToolsDir);
+              
             this.menuManager = new PopupMenu.PopupMenuManager(this);
             this._orientation = orientation;
             this.menu = new Applet.AppletPopupMenu(this, this._orientation);
-            this.menuManager.addMenu(this.menu);                   
+            this.menuManager.addMenu(this.menu);
         }
         catch (e) {
             global.logError(e);
