@@ -19,7 +19,7 @@ This allow quite a few fancy tricks. Read on.
 The sample `tools.json.in` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
 types of tool entries. I will describe them one by one:
 
-{% highlight json linenos %}
+```
 [ 
     ["Terminator", "terminator"], 
     ["Terminology (e11t)", "terminology"], 
@@ -35,8 +35,7 @@ types of tool entries. I will describe them one by one:
     ["-"],
     [ "Edit Tools", "~EDIT~~echo gedit ${TOOLSFILE_IN}~"],
 ]
-{% endhighlight %}
-
+```
 The entire `tools.json.in` file is a valid json-encoded array. It should be formatted cleanly, as it is being parsed later in bash, not with a proper
 json parser. Do not place extraneous content in this file. Standard "//" prefixed comments are fine. Do __not__ include '~' anywhere as it has special meaning!
 
