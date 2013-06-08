@@ -19,7 +19,7 @@ This allow quite a few fancy tricks. Read on.
 The sample `tools.json.in` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
 types of tool entries. I will describe them one by one:
 
-```
+```json linenos
 [ 
     ["Terminator", "terminator"], 
     ["Terminology (e11t)", "terminology"], 
@@ -57,9 +57,12 @@ json parser. Do not place extraneous content in this file. Standard "//" prefixe
   Next is another special character "~". This is a field seperator for output substitution.
   Output substitution is a powerful function ShellTools offers that allows one to dynamically update the content of the menu label (or command) 
   based on the output of a script. Each output substituition entry requires three fields delimited with `~`.
--- The first field is a small identifier, preferably 4-6 characters long, all capitals. It is used by the applet to maintain state. It _must_ be provided.
--- The second field is a "notify command" and is optional. In this particular entry, notify command has not been used.
--- The third field is the shell command whose output will be substituted. Here it is `netspeed.sh wlan0` which is a tool included with the applet that
+
+   - The first field is a small identifier, preferably 4-6 characters long, all capitals. It is used by the applet to maintain state. It _must_ be provided.
+
+   -The second field is a "notify command" and is optional. In this particular entry, notify command has not been used.
+
+   -The third field is the shell command whose output will be substituted. Here it is `netspeed.sh wlan0` which is a tool included with the applet that
    reports total network download and current download rates. 
   
   Thus the entire output substitution entry is `~NETS~~netspeed.sh wlan0~`. Note that the delimiter must be used at the beginning as well as end, not
