@@ -16,7 +16,7 @@ from a simple config file like this:
     ["-"],
     ["!~NETS~~netspeed.sh wlan0~"],
     ["!~IPV6~notify-send -t 2000 ${IPV6}~ipv6monitor.sh~"],
-    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","gnome-disks"],
+    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","terminology -e watch df -h"],
     ["-"],
     ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
     ["!~DBOS~~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~"],
@@ -43,27 +43,12 @@ This allow quite a few fancy tricks. Read on.
 ## Editing tools.json.in
 
 The sample `tools.json.in` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
-types of tool entries. I will describe them one by one:
+types of tool entries. 
 
-```
-[ 
-    ["Terminator", "terminator"], 
-    ["Terminology (e11t)", "terminology"], 
-    ["Send .mobi to Kindle", "sendToKindle_ShellTool.sh"],
-    ["-"],
-    ["!~NETS~~netspeed.sh wlan0~"],
-    ["!~IPV6~notify-send -t 2000 ${IPV6}~ipv6monitor.sh~"],
-    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","gnome-disks"],
-    ["-"],
-    ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
-    ["!~DBOS~~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~"],
-    ["!~DLON~~echo -n "LON: " ; TZ=Europe/London date +'%a %b %-d, %I:%M %P'~"],
-    ["-"],
-    [ "Edit Tools", "~EDIT~~echo gedit ${TOOLSFILE_IN}~"],
-]
-```
 The entire `tools.json.in` file is a valid json-encoded array. It should be formatted cleanly, as it is being parsed later in bash, not with a proper
 json parser. Do not place extraneous content in this file. Standard "//" prefixed comments are fine. Do __not__ include '~' anywhere as it has special meaning!
+
+Going through each line in `tools.json.in` (listed above):
 
 - Lines 2 & 3: These are the basic shortcut-like entries: Each entry is a 2-element JSON array. 
   The first element is a string that will become the label of the corresponding menu item. 
@@ -130,11 +115,11 @@ If the script outputs exactly two lines, the first line is used both as the noti
 
 If the script outputs exactly one line, this line is used as the notify state, internal state as well as the substitution text.
 
-### notify state
+### Notify state
 
 notify state is simply a one-line opaque blob of text the script can output. This blob is saved by the applet without further processing. If on the next invocation of the script, the new notify state returned by the script is different, the applet calls the notify command, if defined. The applet passes the old and the new notify states to the notify command as environment variables named `IDENTIFIER_old` and `IDENTIFIER`, where `IDENTIFIER` is the short 4-6 character id defined as the first field of the output substitution item.
 
-### internal state
+### Internal state
 
 internal state is also a one-line opaque blob of text. When the subsitution command is run, the internal state is passed to it in the environment variable named `IDENTIFIER` 
 
@@ -142,13 +127,33 @@ internal state is also a one-line opaque blob of text. When the subsitution comm
 
 This is the text that the applet will substitute in place of the substitution entry.
 
-## "Do"es and "Don't"s
+## Do-es and Don'ts
 
 - Do not make your custom tools and command long running. For example, obtaining your externally visible IP using an api is a big no-no.
 - A line in the tools.json.in file must contain exactly zero or one output substitution entries. Not more. 
 - Do not use `~` anywhere in the tools.json.in file except as a field separator for output substitution. Otherwise things will break.
 
-## TODO:
-	- Add configuration option and right click menu
+## FAQs
 
+- Q: Why do this with bash?
+
+  A: Minimizes dependencies. It would be a lot easier to do in python, but that would mean requiring python and various modules to be
+     installed. Bash is essentially always present. Also bash is a much lighter process than python.
+
+- Q: Why not simply process `tools.json.in` in the Applet code itself?
+
+  A: Multiple reason:
+
+    - The entries in tools.json.in are bash scripts. Its a lot simpler to process them in Bash. 
+      There is no way to read output of a spawned bash script from inside an applet right now. Also, even if there were a way,
+      it would require syncronous spawning, which would be dangerous in this context.
+    - By spawning a single processing script (`processTools.sh`) in the background, we take it out of the applet critical path, 
+      thus reducing chances of taking down/blocking/slowing the applet or Cinnamon itself.
+    - `processTools.sh` itself can be edited while developing, without having to reload the applet. The applet will just call the new version 
+      at the next update.
+
+## TODO:
+- Add configuration option and right click menu
+    - Configuration option for update frequency
+    - Centrally Enable/Disable notifications without having to manually change `tools.json.in`
 

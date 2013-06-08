@@ -82,7 +82,7 @@ MyApplet.prototype = {
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
                 toolName = tool[0].trim(' ');
-                log(toolName);
+               
                 if (toolName == "-") {
                     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                 }
@@ -91,7 +91,7 @@ MyApplet.prototype = {
                     this.menu.addMenuItem(new PopupMenu.PopupMenuItem(toolName, { reactive: false }));
                 }
                 else {
-                        this.menu.addAction(_(toolName), function(event) {
+                    this.menu.addAction(_(toolName), function(event) {
                         toolCmd =  tool[1].trim(' ');
                         Util.spawnCommandLine(toolCmd);
                     })

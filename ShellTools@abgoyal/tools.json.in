@@ -5,7 +5,7 @@
     ["-"],
     ["!~NETS~~netspeed.sh wlan0~"],
     ["!~IPV6~notify-send -t 2000 ${IPV6}~ipv6monitor.sh~"],
-    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","gnome-disks"],
+    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","terminology -e watch df -h"],
     ["-"],
     ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
     ["!~DBOS~~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~"],

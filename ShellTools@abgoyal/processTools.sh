@@ -56,7 +56,7 @@ do
             # the first line is notify state, the second line is internal state, third is replacement text, rest is ignored
             new_notifystate="${cmdoutput[0]}"
             new_state="${cmdoutput[1]}"
-            new_text=${cmdoutput[1]}
+            new_text=${cmdoutput[2]}
         fi
 
         # if client script uses notify functionality
