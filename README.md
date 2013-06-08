@@ -5,7 +5,7 @@
 Quite simply, This applet generates a dynamic, autoupdated popup menu like this:
 
 
-    ![ShellTools Applet activated Screenshot](ShellTools-1.png??raw=true)
+![ShellTools Applet activated Screenshot](ShellTools-1.png??raw=true)
 
 from a simple config file like this:
 
