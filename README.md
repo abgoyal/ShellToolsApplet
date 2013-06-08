@@ -19,7 +19,7 @@ This allow quite a few fancy tricks. Read on.
 The sample `tools.json.in` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
 types of tool entries. I will describe them one by one:
 
-```json linenos
+```
 [ 
     ["Terminator", "terminator"], 
     ["Terminology (e11t)", "terminology"], 
