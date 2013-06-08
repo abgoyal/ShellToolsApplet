@@ -1,5 +1,31 @@
 # ShellTools Applet:
 
+## tl;dr
+
+Quite simply, This applet generates a dynamic, autoupdated popup menu like this:
+
+![ShellTools Applet activated Screenshot](ShellTools-1.png??raw=true)
+
+from a simple config file like this:
+
+```
+[ 
+    ["Terminator", "terminator"], 
+    ["Terminology (e11t)", "terminology"], 
+    ["Send .mobi to Kindle", "sendToKindle_ShellTool.sh"],
+    ["-"],
+    ["!~NETS~~netspeed.sh wlan0~"],
+    ["!~IPV6~notify-send -t 2000 ${IPV6}~ipv6monitor.sh~"],
+    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","gnome-disks"],
+    ["-"],
+    ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
+    ["!~DBOS~~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~"],
+    ["!~DLON~~echo -n "LON: " ; TZ=Europe/London date +'%a %b %-d, %I:%M %P'~"],
+    ["-"],
+    [ "Edit Tools", "~EDIT~~echo gedit ${TOOLSFILE_IN}~"],
+]
+```
+
 ## Introduction
 ShellTools is an applet for the Cinnamon Desktop that makes it trivial to add shell commands as a panel popup menu
 
