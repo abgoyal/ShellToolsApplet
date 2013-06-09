@@ -37,7 +37,7 @@ do
         shellcmd=${cmds[3]}
 
         # build command line: set the old state and the update period as environment vars
-        cmdoutput=($(export $state_name=${state[${state_name}]} ; export SHELLTOOLS_DT=${SHELLTOOLS_DT} ; eval ${shellcmd}))
+        cmdoutput=($(export SHELLTOOLS_STATE=${state[${state_name}]} ; export SHELLTOOLS_DT=${SHELLTOOLS_DT} ;  eval ${shellcmd}))
 
         # if the client script only generates *exactly* one line of output, use its output as state and notify_state
         if [ ${#cmdoutput[@]} -eq 1 ]
@@ -66,7 +66,7 @@ do
             if [ "${notifystate[${state_name}]}" != "${new_notifystate}" ]
             then
                 # run the notify command
-                (export ${state_name}_old=${notifystate[${state_name}]} ; export ${state_name}=${new_notifystate} ; eval ${notifycmd} )
+                (export SHELLTOOLS_NOTIFYSTATE_OLD=${notifystate[${state_name}]} ; export SHELLTOOLS_NOTIFYSTATE=${new_notifystate} ; eval ${notifycmd} )
             fi
         fi
 

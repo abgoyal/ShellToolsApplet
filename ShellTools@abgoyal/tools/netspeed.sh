@@ -1,7 +1,6 @@
 #! /bin/bash
 
-
-x1=$NETS
+x1=${SHELLTOOLS_STATE}
 if [ "$x1" == "" ]
 then
   x1=0
@@ -23,4 +22,4 @@ dk=$(expr $d / 1024 )
 x1=$x2
 
 echo  ${x1}
-echo "Network: ${x2m} GB / ${rk} KBps"
+echo "$1: ${x2m} GB / ${rk} KBps"

@@ -14,6 +14,8 @@ const IconsFile = GLib.build_filenamev([AppletDir, 'tools_icon.svg']);
 const ToolsFile = GLib.build_filenamev([AppletDir, 'tools.json']);
 const ToolsProcessor = GLib.build_filenamev([AppletDir, 'processTools.sh']);
 const ToolsDir = GLib.build_filenamev([AppletDir, 'tools']);
+const StateFile = GLib.build_filenamev([AppletDir, 'state.sh']);
+
 
 function MyApplet(orientation) {
     this._init(orientation);
@@ -34,7 +36,8 @@ MyApplet.prototype = {
             // by default, after install, the scripts do not have execute permissions
             Util.spawnCommandLine("chmod  744 " + ToolsProcessor);
             Util.spawnCommandLine("chmod -R 744 " + ToolsDir);
-              
+            Util.spawnCommandLine("rm -f " + StateFile);
+    
             this.menuManager = new PopupMenu.PopupMenuManager(this);
             this._orientation = orientation;
             this.menu = new Applet.AppletPopupMenu(this, this._orientation);
