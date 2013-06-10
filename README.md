@@ -171,3 +171,5 @@ This is the text that the applet will substitute in place of the substitution en
     - Configuration option for update frequency
     - Centrally Enable/Disable notifications without having to manually change `tools.json.in`
 
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/30dca0e04a77feec8ddfd9a48464c719 "githalytics.com")](http://githalytics.com/abgoyal/ShellToolsApplet)
+
