@@ -2,7 +2,7 @@
 
 ## tl;dr
 
-Quite simply, This applet generates a dynamic, autoupdated popup menu like this:
+Quite simply, this applet generates a dynamic, auto updated popup menu like this:
 
 
 ![ShellTools Applet activated Screenshot](ShellTools-1.png??raw=true)
@@ -13,10 +13,10 @@ from a simple config file like this:
 [ 
     ["Terminator", "terminator"], 
     ["Terminology (e11t)", "terminology"], 
-    ["Send .mobi to Kindle", "sendToKindle_ShellTool.sh"],
+    ["Send .mobi to Kindle", "sendToKindle.sh"],
     ["-"],
     ["!~NETS~~netspeed.sh wlan0~"],
-    ["!~IPV6~notify-send -t 2000 ${IPV6}~ipv6monitor.sh~"],
+    ["!~IPV6~notify.sh~ipv6monitor.sh~"],
     ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","terminology -e watch df -h"],
     ["-"],
     ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
@@ -35,8 +35,8 @@ I initially wrote the ShellTools applet as a way to learn writing applets for Ci
 Install the applet as normal, add it to panel, and then click the applet icon in the panel. Select the "Edit Tools" menu option
 to start adding your own custom tools.
 
-ShellTools recreats the menu each time the icon is clicked in the Cinnamon panel. It re-reads the list of tools from
-`tools.json.in` when it builds the menu. So all you need to do to see any changes you made to the `tools.json.in`, is to wait upto 15 seconds
+ShellTools recreates the menu each time the icon is clicked in the Cinnamon panel. It re-reads the list of tools from
+`tools.json.in` when it builds the menu. So all you need to do to see any changes you made to the `tools.json.in`, is to wait up to 15 seconds
 and then click the applet icon.
 
 This allow quite a few fancy tricks. Read on.
@@ -63,12 +63,12 @@ Going through each line in `tools.json.in` (listed above):
 
 - Line 5: Inserts a "Separator" into the popup menu. This is simply a 1-element JSON array.
 
-- Line 6: This line defines an informational-only, dynamic item with output substituition. It is simply a 1-element JSON  array, as it executes no commands. 
+- Line 6: This line defines an informational-only, dynamic item with output substitution. It is simply a 1-element JSON  array, as it executes no commands. 
   What marks it as a "non-interactive" entry is that its first character is "!". This "!" will be removed by the applet
   before setting up the menu, but it will cause the applet to make the particular entry "inactive".
-  Next is another special character "~". This is a field seperator for output substitution.
+  Next is another special character "~". This is a field separator for output substitution.
   Output substitution is a powerful function ShellTools offers that allows one to dynamically update the content of the menu label (or command) 
-  based on the output of a script. Each output substituition entry requires three fields delimited with `~`.
+  based on the output of a script. Each output substitution entry requires three fields delimited with `~`.
 
    - The first field (here `NETS`) is a small identifier, preferably 4-6 characters long, all capitals. It is used by the applet to maintain state. It _must_ be provided.
 
@@ -84,9 +84,7 @@ Going through each line in `tools.json.in` (listed above):
 
 - Line 7: This is another informational item with output substitution. 
   The difference between the previous entry and this one is that it also uses the notify function.
-  As explained, the second field in the output substitution entry is the notify command. Here it is set to `notify-send -t 2000 ${IPV6}`.
-  `notify-send` is a gnome utility to send desktop notifications. The shell variable referenced in the notify command, `${IPV6}`, matches the 
-  identified defined in the first field. This allows the command to refer to the notify-state of the command. Read the next section on how to set this.
+  As explained, the second field in the output substitution entry is the notify command. Here it is set to `notify.sh`, which is an included tool.
 
 - Line 8: This is another output substitution entry but this one is an active item, not simply "informational". 
   Thus, its a 2-element array, the second element defining the command to be run. 
@@ -98,7 +96,7 @@ Going through each line in `tools.json.in` (listed above):
 - Lines 10,11,12: These entries are further examples of informational-only items. They show the local times in three different time zones.
   Note the use of `echo -n` here preceding the date command so that the entire output is generated on one line.
 
-- Line 14: Here, output substitution is used, not for the menul label text, but for the command text itself. The location of the tools file is
+- Line 14: Here, output substitution is used, not for the menu label text, but for the command text itself. The location of the tools file is
   inserted using a variable substitution. Note the use of `echo` here.
 
 
@@ -118,13 +116,28 @@ If the script outputs exactly one line, this line is used as the notify state, i
 
 ### Notify state
 
-notify state is simply a one-line opaque blob of text the script can output. This blob is saved by the applet without further processing. If on the next invocation of the script, the new notify state returned by the script is different, the applet calls the notify command, if defined. The applet passes the old and the new notify states to the notify command as environment variables named `IDENTIFIER_old` and `IDENTIFIER`, where `IDENTIFIER` is the short 4-6 character id defined as the first field of the output substitution item.
+notify state is simply a one-line opaque blob of text the script can output. This blob is saved by the applet without further processing. If on the next invocation of the script, the new notify state returned by the script is different, the applet calls the notify command, if defined. The applet passes the old and the new notify states to the notify command as environment variables named `SHELLTOOLS_NOTIFYSTATE_OLD` and `SHELLTOOLS_NOTIFYSTATE` respectively.
 
 ### Internal state
 
-internal state is also a one-line opaque blob of text. When the subsitution command is run, the internal state is passed to it in the environment variable named `IDENTIFIER` 
+internal state is also a one-line opaque blob of text. When the substitution command is run, the internal state is passed to it in the environment variable named `SHELLTOOLS_STATE` 
 
-### Subsitution text
+### Client script API
+
+Client scripts, the ones referenced in `tools.json.in`, for example `netspeed.sh` in the example above, have access to certain environment variables that they can use to get their work done
+
+- `SHELLTOOLS_STATE`: Provides the value of the internal state as set by the last run of the script.
+- `SHELLTOOLS_DT`: Provides the time in seconds between consequent executions of the client script. This might be useful for, e.g. averaging etc. `netspeed.sh` uses it.
+
+The following environment variables are also available but as these are essentially applet-internal variables, their use is discouraged.
+
+- `APPLETDIR`: The directory the applet has been installed in
+- `TOOLSFILE_IN`: The absolute filename of the `tools.json.in` file
+- `TOOLSFILE_OUT`: The absolute filename of the `tools.json` file
+- `TOOLSDIR`: The directory where the tool script live
+- `STATEFILE`: The absolute filename of the internal state file
+
+### Substitution text
 
 This is the text that the applet will substitute in place of the substitution entry.
 
@@ -147,7 +160,7 @@ This is the text that the applet will substitute in place of the substitution en
 
     - The entries in tools.json.in are bash scripts. Its a lot simpler to process them in Bash. 
       There is no way to read output of a spawned bash script from inside an applet right now. Also, even if there were a way,
-      it would require syncronous spawning, which would be dangerous in this context.
+      it would require synchronous spawning, which would be dangerous in this context.
     - By spawning a single processing script (`processTools.sh`) in the background, we take it out of the applet critical path, 
       thus reducing chances of taking down/blocking/slowing the applet or Cinnamon itself.
     - `processTools.sh` itself can be edited while developing, without having to reload the applet. The applet will just call the new version 
