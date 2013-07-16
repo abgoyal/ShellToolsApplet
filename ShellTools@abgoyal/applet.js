@@ -88,8 +88,8 @@ MyApplet.prototype = {
 
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
-                toolName = tool[0].trim(' ');
-                toolCmd =  tool[1].trim(' ');
+                let toolName = tool[0].trim(' ');
+                let toolCmd =  tool[1].trim(' ');
                
                 if (toolName == "-") {
                     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
