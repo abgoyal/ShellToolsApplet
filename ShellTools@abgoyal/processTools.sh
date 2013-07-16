@@ -3,7 +3,7 @@
 APPLETDIR="$1"
 SHELLTOOLS_DT=$2
 
-TOOLSFILE_IN="${APPLETDIR}/tools.json.in"
+TOOLSFILE_IN="${APPLETDIR}/tools.ini"
 TOOLSFILE_OUT="${APPLETDIR}/tools.json"
 TOOLSDIR="${APPLETDIR}/tools/"
 STATEFILE="${APPLETDIR}/state.sh"
@@ -13,8 +13,10 @@ PATH=$TOOLSDIR:$PATH
 
 # state storage for client scripts
 # This provides an easy way for a client script to persist state between calls. 
-declare -A state
-declare -A notifystate
+declare -A clickcmd_state
+declare -A clickcmd_notifystate
+declare -A labelcmd_state
+declare -A labelcmd_notifystate
 
 #load states from previous run
 if [ -e $STATEFILE ]
@@ -22,80 +24,157 @@ then
     source $STATEFILE
 fi
 
-# read in the tools file, split into fields seperated by ~
-while IFS='~' read -a cmds
+
+echo "[" > "${TOOLSFILE_OUT}.tmp"
+
+while read line
 do
-    # if the current line being requires processing
-    if [ ${#cmds[@]} -gt 1 ]
+    if [[ "$line" =~ ^BEGINITEM:(.+)$ ]]
     then
-        # make sure the IFS is set right
-        IFS=$'\n'
+        state_name="${BASH_REMATCH[1]}"    
 
-        # extract fields
-        state_name=${cmds[1]}
-        notifycmd=${cmds[2]}
-        shellcmd=${cmds[3]}
+        LABELCMD=
+        LABELTXT=
+        CLICKCMD=
+        CLICKTXT=
+        NOTIFYCMD=
 
-        # build command line: set the old state and the update period as environment vars
-        cmdoutput=($(export SHELLTOOLS_STATE=${state[${state_name}]} ; export SHELLTOOLS_DT=${SHELLTOOLS_DT} ;  eval ${shellcmd}))
-
-        # if the client script only generates *exactly* one line of output, use its output as state and notify_state
-        if [ ${#cmdoutput[@]} -eq 1 ]
-        then
-            new_notifystate="${cmdoutput[0]}"
-            new_state="${cmdoutput[0]}"
-            new_text=${cmdoutput[0]}
-        # if the client script generates exactly two lines of output, use first line as state and notify state, and the second as output 
-        elif [ ${#cmdoutput[@]} -eq 2 ]
-        then
-            new_notifystate="${cmdoutput[0]}"
-            new_state="${cmdoutput[0]}"
-            new_text=${cmdoutput[1]}
-        else 
-            # the client script generates more than two line of output.
-            # the first line is notify state, the second line is internal state, third is replacement text, rest is ignored
-            new_notifystate="${cmdoutput[0]}"
-            new_state="${cmdoutput[1]}"
-            new_text=${cmdoutput[2]}
-        fi
-
-        # if client script uses notify functionality
-        if [ "$notifycmd" != "" ]
-        then
-            # if notify_state has changed
-            if [ "${notifystate[${state_name}]}" != "${new_notifystate}" ]
+        while read line
+        do
+            if [[ "$line" =~ ^END$ ]]
             then
-                # run the notify command
-                (export SHELLTOOLS_NOTIFYSTATE_OLD=${notifystate[${state_name}]} ; export SHELLTOOLS_NOTIFYSTATE=${new_notifystate} ; eval ${notifycmd} )
+                break
+            fi
+        
+            if [[ $line =~ ^([^=]+)=(.+)$ ]]
+            then
+                eval "${BASH_REMATCH[1]}"="${BASH_REMATCH[2]}"
+            fi
+        done
+
+        if [[ "${state_name}" == "SEPERATOR" ]]
+        then
+            LABELTXT="-"            
+        else
+            if [[ -n "$LABELCMD" ]] 
+            then
+                IFS=$'\n'
+
+                cmdoutput=($(export SHELLTOOLS_STATE=${labelcmd_state[${state_name}]} ; export SHELLTOOLS_DT=${SHELLTOOLS_DT} ;  eval ${LABELCMD}))
+
+                # if the client script only generates *exactly* one line of output, use its output as state and notify_state
+                if [ ${#cmdoutput[@]} -eq 1 ]
+                then
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[0]}"
+                    new_text=${cmdoutput[0]}
+                # if the client script generates exactly two lines of output, use first line as state and notify state, and the second as output 
+                elif [ ${#cmdoutput[@]} -eq 2 ]
+                then
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[0]}"
+                    new_text=${cmdoutput[1]}
+                else 
+                    # the client script generates more than two line of output.
+                    # the first line is notify state, the second line is internal state, third is replacement text, rest is ignored
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[1]}"
+                    new_text=${cmdoutput[2]}
+                fi
+
+                # if client script uses notify functionality
+                if [[ -n "$NOTIFYCMD" ]]
+                then
+                    # if notify_state has changed
+                    if [ "${labelcmd_notifystate[${state_name}]}" != "${new_notifystate}" ]
+                    then
+                        # run the notify command
+                        (export SHELLTOOLS_NOTIFYSTATE_OLD=${labelcmd_notifystate[${state_name}]} ; export SHELLTOOLS_NOTIFYSTATE=${new_notifystate} ; eval ${NOTIFYCMD} )
+                    fi
+                fi
+
+                # save new context
+                labelcmd_state[${state_name}]=${new_state}
+                labelcmd_notifystate[${state_name}]=${new_notifystate}
+
+                LABELTXT=${new_text}
+
+            fi
+
+            if [[ -n "$CLICKCMD" ]] 
+            then
+                IFS=$'\n'
+
+                cmdoutput=($(export SHELLTOOLS_STATE=${clickcmd_state[${state_name}]} ; export SHELLTOOLS_DT=${SHELLTOOLS_DT} ;  eval ${CLICKCMD}))
+
+                # if the client script only generates *exactly* one line of output, use its output as state and notify_state
+                if [ ${#cmdoutput[@]} -eq 1 ]
+                then
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[0]}"
+                    new_text=${cmdoutput[0]}
+                # if the client script generates exactly two lines of output, use first line as state and notify state, and the second as output 
+                elif [ ${#cmdoutput[@]} -eq 2 ]
+                then
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[0]}"
+                    new_text=${cmdoutput[1]}
+                else 
+                    # the client script generates more than two line of output.
+                    # the first line is notify state, the second line is internal state, third is replacement text, rest is ignored
+                    new_notifystate="${cmdoutput[0]}"
+                    new_state="${cmdoutput[1]}"
+                    new_text=${cmdoutput[2]}
+                fi
+
+                # if client script uses notify functionality
+                if [[ -n "$NOTIFYCMD" ]]
+                then
+                    # if notify_state has changed
+                    if [ "${clickcmd_notifystate[${state_name}]}" != "${new_notifystate}" ]
+                    then
+                        # run the notify command
+                        (export SHELLTOOLS_NOTIFYSTATE_OLD=${clickcmd_notifystate[${state_name}]} ; export SHELLTOOLS_NOTIFYSTATE=${new_notifystate} ; eval ${NOTIFYCMD} )
+                    fi
+                fi
+
+                # save new context
+                clickcmd_state[${state_name}]=${new_state}
+                clickcmd_notifystate[${state_name}]=${new_notifystate}
+
+                CLICKTXT=${new_text}
             fi
         fi
 
-        # save new context
-        state[${state_name}]=${new_state}
-        notifystate[${state_name}]=${new_notifystate}
-        
-        # update the popup contents
-        cmds[1]=""
-        cmds[2]=""
-        cmds[3]=${new_text}
+        # output the popup contents
+        echo "[ \"${LABELTXT}\" , \"${CLICKTXT}\" ],"
 
     fi
+done < "$TOOLSFILE_IN" >> "${TOOLSFILE_OUT}.tmp"
 
-    # output the popup contents        
-    echo $(printf "%s" "${cmds[@]}")
-done < "$TOOLSFILE_IN" > "${TOOLSFILE_OUT}.tmp"
+echo "]" >> "${TOOLSFILE_OUT}.tmp"
 
 mv "${TOOLSFILE_OUT}.tmp" "${TOOLSFILE_OUT}"
 
 #save states
 
-for i in "${!state[@]}"
+for i in "${!labelcmd_state[@]}"
 do
-  echo "state[$i]=\"${state[$i]}\""
+  echo "labelcmd_state[$i]=\"${labelcmd_state[$i]}\""
 done > $STATEFILE
 
-for i in "${!notifystate[@]}"
+for i in "${!labelcmd_notifystate[@]}"
 do
-  echo "notifystate[$i]=\"${notifystate[$i]}\""
+  echo "labelcmd_notifystate[$i]=\"${labelcmd_notifystate[$i]}\""
+done >> $STATEFILE
+
+for i in "${!clickcmd_state[@]}"
+do
+  echo "clickcmd_state[$i]=\"${clickcmd_state[$i]}\""
+done >> $STATEFILE
+
+for i in "${!clickcmd_notifystate[@]}"
+do
+  echo "clickcmd_notifystate[$i]=\"${clickcmd_notifystate[$i]}\""
 done >> $STATEFILE
 
