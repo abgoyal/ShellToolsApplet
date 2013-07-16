@@ -10,21 +10,78 @@ Quite simply, this applet generates a dynamic, auto updated popup menu like this
 from a simple config file like this:
 
 ```
-[ 
-    ["Terminator", "terminator"], 
-    ["Terminology (e11t)", "terminology"], 
-    ["Send .mobi to Kindle", "sendToKindle.sh"],
-    ["-"],
-    ["!~NETS~~netspeed.sh wlan0~"],
-    ["!~IPV6~notify.sh~ipv6monitor.sh~"],
-    ["~DISK~~df -B GB $HOME | tail -n 1 | awk '{print \"Home:\",$4,\"free\"}'~","terminology -e watch df -h"],
-    ["-"],
-    ["!~DSFO~~echo -n "SFO: " ; TZ=US/Pacific date +'%a %b %-d, %I:%M %P'~"],
-    ["!~DBOS~~echo -n "BOS: " ; TZ=US/Eastern date +'%a %b %-d, %I:%M %P'~"],
-    ["!~DLON~~echo -n "LON: " ; TZ=Europe/London date +'%a %b %-d, %I:%M %P'~"],
-    ["-"],
-    [ "Edit Tools", "~EDIT~~echo gedit ${TOOLSFILE_IN}~"],
-]
+
+BEGINITEM:TERM
+LABELTXT="Terminator"
+CLICKTXT="terminator"
+END
+
+BEGINITEM:TLOGY
+LABELTXT="Terminology(e11t)"
+CLICKTXT="terminology"
+END
+
+BEGINITEM:PORTS
+LABELTXT="Ports"
+CLICKTXT="terminology -T=Ports -e 'sudo tcptrack -i wlan0'"
+END
+
+BEGINITEM:MOBI
+LABELTXT="Send .mobi to Kindle"
+CLICKTXT="sendToKindle.sh"
+END
+
+BEGINITEM:SEPERATOR
+END
+
+BEGINITEM:NET1
+LABELCMD="netspeed.sh wlan0"
+CLICKTXT="terminology -T=NetworkStats -e watch vnstat -i wlan0 -d"
+END
+
+
+BEGINITEM:IPV6
+NOTIFCMD="notify.sh"
+LABELCMD="ipv6monitor.sh"
+CLICKTXT="terminology -e tail -f /var/log/gogoc/gogoc.log"
+END
+
+BEGINITEM:DISKF
+LABELCMD="diskfree.sh H /home/abhishek/ D /media/data/abhishek M /media/truecrypt1/"
+CLICKTXT="terminology -T=DiskFree -e watch df -h"
+END
+
+BEGINITEM:CPUT
+LABELCMD="cputemps.sh"
+END
+
+BEGINITEM:NUML
+LABELCMD="numlock_monitor.sh"
+END
+
+BEGINITEM:SEPERATOR
+END
+
+BEGINITEM:DSFO
+LABELCMD="TZ=US/Pacific date +'SFO: %a %b %-d, %I:%M %P'"
+END
+
+BEGINITEM:DBOS
+LABELCMD="TZ=US/Eastern date +'BOS: %a %b %-d, %I:%M %P'"
+END
+
+BEGINITEM:DLON
+LABELCMD="TZ=Europe/London date +'LON: %a %b %-d, %I:%M %P'"
+END
+
+BEGINITEM:SEPERATOR
+END
+
+BEGINITEM:EDIT
+LABELTXT="Edit Tools"
+CLICKCMD="echo gnome-open ${TOOLSFILE_IN}"
+END
+
 ```
 
 ## Introduction
@@ -36,20 +93,17 @@ Install the applet as normal, add it to panel, and then click the applet icon in
 to start adding your own custom tools.
 
 ShellTools recreates the menu each time the icon is clicked in the Cinnamon panel. It re-reads the list of tools from
-`tools.json.in` when it builds the menu. So all you need to do to see any changes you made to the `tools.json.in`, is to wait up to 15 seconds
+`tools.ini` when it builds the menu. So all you need to do to see any changes you made to the `tools.ini`, is to wait up to 15 seconds
 and then click the applet icon.
 
 This allow quite a few fancy tricks. Read on.
 
-## Editing tools.json.in
+## Editing tools.ini
 
-The sample `tools.json.in` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
+The sample `tools.ini` file included with applet demonstrates various ways of creating your own custom tools. It demonstrates eight different
 types of tool entries. 
 
-The entire `tools.json.in` file is a valid json-encoded array. It should be formatted cleanly, as it is being parsed later in bash, not with a proper
-json parser. Do not place extraneous content in this file. Standard "//" prefixed comments are fine. Do __not__ include '~' anywhere as it has special meaning!
-
-Going through each line in `tools.json.in` (listed above):
+Going through each line in `tools.ini` (listed above):
 
 - Lines 2 & 3: These are the basic shortcut-like entries. Each entry is a 2-element JSON array. 
   The first element is a string that will become the label of the corresponding menu item. 

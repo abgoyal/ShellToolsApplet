@@ -89,17 +89,17 @@ MyApplet.prototype = {
             for (let i = 0; i < tools.length; i++) {
                 let tool = tools[i];
                 toolName = tool[0].trim(' ');
+                toolCmd =  tool[1].trim(' ');
                
                 if (toolName == "-") {
                     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                 }
-                else if (toolName[0] == "!") {
-                    toolName = toolName.substr(1);
+                else if (toolCmd.length == 0) {
                     this.menu.addMenuItem(new PopupMenu.PopupMenuItem(toolName, { reactive: false }));
                 }
                 else {
                     this.menu.addAction(_(toolName), function(event) {
-                        toolCmd =  tool[1].trim(' ');
+                        
                         Util.spawnCommandLine(toolCmd);
                     })
                 }
